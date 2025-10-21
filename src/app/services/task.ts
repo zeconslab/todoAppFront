@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Auth } from './auth';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Tasks } from '../models/task';
+import { TaskInterface } from '../models/task';
 
 @Injectable({
   providedIn: 'root'
@@ -18,16 +18,16 @@ export class Task {
     });
   }
 
-  getTasks(): Observable<Tasks[]> {
-    return this.http.get<Tasks[]>(`${this.baseUrl}`, { headers: this.getHeaders()})
+  getTasks(): Observable<TaskInterface[]> {
+    return this.http.get<TaskInterface[]>(`${this.baseUrl}`, { headers: this.getHeaders()})
   }
 
-  addTask(task: Tasks): Observable<Tasks> {
-    return this.http.post<Tasks>(`${this.baseUrl}`, task, { headers: this.getHeaders()});
+  addTask(task: TaskInterface): Observable<TaskInterface> {
+    return this.http.post<TaskInterface>(`${this.baseUrl}`, task, { headers: this.getHeaders()});
   }
 
-  updateTask(task: Tasks): Observable<Tasks> {
-    return this.http.put<Tasks>(`${this.baseUrl}/${task.id}`, task, { headers: this.getHeaders()});
+  updateTask(task: TaskInterface): Observable<TaskInterface> {
+    return this.http.put<TaskInterface>(`${this.baseUrl}/${task.id}`, task, { headers: this.getHeaders()});
   }
 
   deleteTask(taskId: number): Observable<void> {
