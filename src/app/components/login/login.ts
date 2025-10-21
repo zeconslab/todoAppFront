@@ -27,7 +27,7 @@ export class Login {
         .subscribe({
           next: (response) => {
             this.isLoading = false;
-            sessionStorage.setItem('token', response.token);
+            this.authService.saveToken(response.token);
             this.router.navigate(['/tasks']);
           },
           error: (error) => {

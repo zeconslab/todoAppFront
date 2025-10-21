@@ -17,4 +17,20 @@ export class Auth {
   register(register: RegisterDto): Observable<any> {
     return this.http.post(`${this.baseUrl}/register`, register);
   }
+
+  logout(): void {
+    localStorage.removeItem('token');
+  }
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
 }
