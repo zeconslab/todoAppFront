@@ -1,24 +1,109 @@
-<div class="container mt-4">
-  <h3 class="mb-3">Mis Tareas</h3>
-
-  <form class="d-flex mb-3" (ngSubmit)="addTask()">
-    <input
-      type="text"
-      class="form-control me-2"
-      placeholder="Nueva tarea..."
-      name="newTask"
-      required
-    />
-    <button class="btn btn-primary">Agregar</button>
-  </form>
-
-  <ul class="list-group">
-    <li *ngFor="let task of tasks" class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <input type="checkbox" (change)="updateTask(task)" />
-        <span [class.text-decoration-line-through]="task.completed" class="ms-2">{{ task.title }}</span>
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      
+      <!-- Header -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-0">📋 Mis Tareas</h2>
+        </div>
       </div>
-      <button class="btn btn-sm btn-danger" (click)="deleteTask(task.id)">Eliminar</button>
-    </li>
-  </ul>
+
+      <!-- Formulario para agregar tarea -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">✨ Agregar Nueva Tarea</h5>
+          <form (ngSubmit)="addTask()">
+            <div class="mb-3">
+              <label for="taskTitle" class="form-label">Título</label>
+              <input
+                type="text"
+                class="form-control"
+                id="taskTitle"
+                placeholder="¿Qué necesitas hacer?"
+                [(ngModel)]="task.title"
+                name="title"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="taskDescription" class="form-label">Descripción</label>
+              <textarea
+                class="form-control"
+                id="taskDescription"
+                rows="2"
+                placeholder="Detalles adicionales (opcional)"
+                [(ngModel)]="task.description"
+                name="description"
+              ></textarea>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">
+                Agregar Tarea
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Lista de tareas -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">📝 Lista de Tareas</h5>
+          
+          <div *ngIf="tasks.length === 0" class="text-center text-muted py-5">
+            <h6>🎯 ¡No hay tareas!</h6>
+            <p class="mb-0">Agrega tu primera tarea para comenzar</p>
+          </div>
+
+          <div *ngFor="let task of tasks" class="card mb-3 border-start border-4" 
+               [class.border-success]="task.completed" 
+               [class.border-warning]="!task.completed">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <div class="form-check mb-2">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      [checked]="task.completed"
+                      (change)="updateTask(task)"
+                      [id]="'task-' + task.id"
+                    />
+                    <label class="form-check-label" [for]="'task-' + task.id">
+                      <h6 class="mb-1" 
+                          [class.text-decoration-line-through]="task.completed"
+                          [class.text-muted]="task.completed">
+                        {{ task.title }}
+                      </h6>
+                    </label>
+                  </div>
+                  
+                  <p class="text-muted mb-0 small" 
+                     [class.text-decoration-line-through]="task.completed"
+                     *ngIf="task.description">
+                    {{ task.description }}
+                  </p>
+                  
+                  <span class="badge mt-2" 
+                        [class.bg-success]="task.completed" 
+                        [class.bg-warning]="!task.completed">
+                    {{ task.completed ? '✅ Completada' : '⏳ Pendiente' }}
+                  </span>
+                </div>
+                
+                <button 
+                  class="btn btn-outline-danger btn-sm ms-3" 
+                  (click)="deleteTask(task.id)"
+                  title="Eliminar tarea">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>

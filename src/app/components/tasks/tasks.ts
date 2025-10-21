@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Task } from '../../services/task';
 import { TaskInterface } from '../../models/task';
 
 @Component({
   selector: 'app-tasks',
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css'
 })
