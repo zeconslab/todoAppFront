@@ -1,10 +1,18 @@
 <div class="container-fluid py-2 bg-light min-vh-100">
   <div class="row justify-content-center">
-    <div class="col-xl-8 col-lg-10 col-md-12">
+    <div class="col-xl-10 col-lg-12 col-md-12">
       
       <!-- Header elegante -->
       <div class="card border-0 shadow-lg mb-2 bg-gradient bg-primary text-white">
-        <div class="card-body text-center py-2">
+        <div class="card-body text-center py-2 position-relative">
+          <!-- Botón de cerrar sesión -->
+          <button 
+            class="btn btn-outline-light btn-sm rounded-pill px-3 position-absolute top-0 end-0 mt-3 me-3" 
+            (click)="logout()"
+            title="Cerrar sesión">
+            Cerrar Sesion
+          </button>
+          
           <h1 class="display-6 fw-bold mb-2">
             Gestor de Tareas
           </h1>
@@ -50,143 +58,252 @@
         <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
       </div>
 
-      <!-- Formulario moderno para agregar tarea -->
-      <div class="card border-0 shadow-lg mb-2">
-        <div class="card-header bg-white border-0 pt-4">
-          <h4 class="card-title text-primary mb-0">
-            Nueva Tarea
-          </h4>
-          <p class="text-muted mb-0 mt-1">Agrega una nueva tarea a tu lista</p>
+      <!-- Layout de dos columnas -->
+      <div class="row g-3">
+        
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-lg-4 col-md-5">
+          <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 pt-4">
+              <h4 class="card-title text-primary mb-0">
+                Nueva Tarea
+              </h4>
+              <p class="text-muted mb-0 mt-1">Agrega una nueva tarea</p>
+            </div>
+            <div class="card-body p-4">
+              <form (ngSubmit)="addTask()">
+                <div class="mb-3">
+                  <label for="taskTitle" class="form-label fw-semibold">
+                    Titulo <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg border-2 rounded-3"
+                    id="taskTitle"
+                    placeholder="¿Que necesitas hacer hoy?"
+                    [(ngModel)]="task.title"
+                    name="title"
+                    required
+                    maxlength="200"
+                  />
+                </div>
+                
+                <div class="mb-4">
+                  <label for="taskDescription" class="form-label fw-semibold">
+                    Descripcion <span class="text-danger">*</span>
+                  </label>
+                  <textarea
+                    class="form-control border-2 rounded-3"
+                    id="taskDescription"
+                    rows="4"
+                    placeholder="Describe los detalles de la tarea"
+                    [(ngModel)]="task.description"
+                    name="description"
+                    required
+                    maxlength="500"
+                  ></textarea>
+                </div>
+                
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-semibold" 
+                          [disabled]="isLoading || !task.title.trim() || !task.description.trim()">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" 
+                          aria-hidden="true" *ngIf="isLoading"></span>
+                    {{ isLoading ? 'Agregando...' : 'Agregar Tarea' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-        <div class="card-body p-4">
-          <form (ngSubmit)="addTask()">
-            <div class="row">
-              <div class="col-md-8 mb-3">
-                <label for="taskTitle" class="form-label fw-semibold">
-                  Titulo <span class="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  class="form-control form-control-lg border-2 rounded-3"
-                  id="taskTitle"
-                  placeholder="¿Que necesitas hacer hoy?"
-                  [(ngModel)]="task.title"
-                  name="title"
-                  required
-                  maxlength="200"
-                />
-              </div>
-              <div class="col-md-4 mb-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold" 
-                        [disabled]="isLoading || !task.title.trim() || !task.description.trim()">
-                  <span class="spinner-border spinner-border-sm me-2" role="status" 
-                        aria-hidden="true" *ngIf="isLoading"></span>
-                  {{ isLoading ? 'Agregando...' : 'Agregar' }}
+
+        <!-- Columna derecha: Lista de tareas -->
+        <div class="col-lg-8 col-md-7">
+          <div class="card border-0 shadow-lg h-100">
+            <div class="card-header bg-white border-0 pt-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h4 class="card-title text-primary mb-0">
+                    Mis Tareas
+                  </h4>
+                  <p class="text-muted mb-0 mt-1">Gestiona y organiza tu dia</p>
+                </div>
+                <button class="btn btn-outline-primary rounded-pill px-4" (click)="loadTasks()">
+                  Actualizar
                 </button>
               </div>
             </div>
-            <div class="mb-0">
-              <label for="taskDescription" class="form-label fw-semibold">
-                Descripcion <span class="text-danger">*</span>
-              </label>
-              <textarea
-                class="form-control border-2 rounded-3"
-                id="taskDescription"
-                rows="3"
-                placeholder="Describe los detalles de la tarea"
-                [(ngModel)]="task.description"
-                name="description"
-                required
-                maxlength="500"
-              ></textarea>
-            </div>
-          </form>
-        </div>
-      </div>
+            <div class="card-body p-4" style="max-height: 70vh; overflow-y: auto;">
+              
+              <!-- Estado vacío mejorado -->
+              <div *ngIf="tasks.length === 0" class="text-center py-5">
+                <div class="mb-4">
+                  <div class="display-1 text-muted opacity-50">📋</div>
+                </div>
+                <h5 class="text-muted mb-2">Tu lista esta vacia</h5>
+                <p class="text-muted mb-4">Comienza agregando tu primera tarea</p>
+                <div class="d-flex justify-content-center">
+                  <div class="bg-light rounded-3 px-4 py-2">
+                    <small class="text-muted">
+                      Tip: Usa descripciones claras para tus tareas
+                    </small>
+                  </div>
+                </div>
+              </div>
 
-      <!-- Lista de tareas moderna -->
-      <div class="card border-0 shadow-lg">
-        <div class="card-header bg-white border-0 pt-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h4 class="card-title text-primary mb-0">
-                Mis Tareas
-              </h4>
-              <p class="text-muted mb-0 mt-1">Gestiona y organiza tu dia</p>
-            </div>
-            <button class="btn btn-outline-primary rounded-pill px-4" (click)="loadTasks()">
-              Actualizar
-            </button>
-          </div>
-        </div>
-        <div class="card-body p-4">
-          
-          <!-- Estado vacío mejorado -->
-          <div *ngIf="tasks.length === 0" class="text-center py-5">
-            <div class="mb-4">
-              <div class="display-1 text-muted opacity-50">📋</div>
-            </div>
-            <h5 class="text-muted mb-2">Tu lista esta vacia</h5>
-            <p class="text-muted mb-4">Comienza agregando tu primera tarea para ser mas productivo</p>
-            <div class="d-flex justify-content-center">
-              <div class="bg-light rounded-3 px-4 py-2">
-                <small class="text-muted">
-                  Tip: Usa descripciones claras para tus tareas
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tareas Pendientes con diseño moderno -->
-          <div *ngIf="pendingTasks.length > 0" class="mb-5">
-            <div class="d-flex align-items-center mb-4">
-              <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
-                <span class="text-warning fw-bold">⏰</span>
-              </div>
-              <div>
-                <h5 class="mb-0 text-warning fw-bold">Tareas Pendientes</h5>
-                <small class="text-muted">{{pendingTasks.length}} tareas por completar</small>
-              </div>
-            </div>
-            
-            <div class="row g-3">
-              <div *ngFor="let task of pendingTasks" class="col-12">
-                <div class="card border-0 shadow-sm bg-warning bg-opacity-5 border-start border-warning border-4">
-                  <div class="card-body p-4">
-                    
-                    <!-- Modo de vista normal -->
-                    <div *ngIf="editingTask?.id !== task.id">
-                      <div class="d-flex align-items-start">
-                        <div class="form-check form-switch me-3 mt-1">
-                          <input 
-                            class="form-check-input" 
-                            type="checkbox" 
-                            role="switch"
-                            [checked]="task.completed"
-                            (change)="toggleTaskCompletion(task)"
-                            [id]="'task-' + task?.id"
-                            style="transform: scale(1.5);"
-                          />
-                          <label class="form-check-label" [for]="'task-' + task?.id"></label>
+              <!-- Tareas Pendientes con diseño moderno -->
+              <div *ngIf="pendingTasks.length > 0" class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                    <span class="text-warning fw-bold">⏰</span>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-warning fw-bold">Tareas Pendientes</h6>
+                    <small class="text-muted">{{pendingTasks.length}} por completar</small>
+                  </div>
+                </div>
+                
+                <div class="row g-2">
+                  <div *ngFor="let task of pendingTasks" class="col-12">
+                    <div class="card border-0 shadow-sm bg-warning bg-opacity-5 border-start border-warning border-3">
+                      <div class="card-body p-3">
+                        
+                        <!-- Modo de vista normal -->
+                        <div *ngIf="editingTask?.id !== task.id">
+                          <div class="d-flex align-items-start">
+                            <div class="form-check form-switch me-3 mt-1">
+                              <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                role="switch"
+                                [checked]="task.completed"
+                                (change)="toggleTaskCompletion(task)"
+                                [id]="'task-' + task?.id"
+                                style="transform: scale(1.3);"
+                              />
+                              <label class="form-check-label" [for]="'task-' + task?.id"></label>
+                            </div>
+                            <div class="flex-grow-1">
+                              <h6 class="mb-1 fw-semibold">{{ task.title }}</h6>
+                              <p class="text-muted mb-2 small lh-sm" *ngIf="task.description">
+                                {{ task.description }}
+                              </p>
+                              <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small">
+                                  Pendiente
+                                </span>
+                                <div class="btn-group">
+                                  <button 
+                                    class="btn btn-primary btn-sm rounded-pill px-2" 
+                                    (click)="startEditTask(task)"
+                                    title="Editar tarea">
+                                    Editar
+                                  </button>
+                                  <button 
+                                    class="btn btn-danger btn-sm rounded-pill px-2 ms-1" 
+                                    (click)="deleteTask(task.id ? task.id : 0)"
+                                    title="Eliminar tarea">
+                                    Eliminar
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div class="flex-grow-1">
-                          <h6 class="mb-2 fw-semibold">{{ task.title }}</h6>
-                          <p class="text-muted mb-3 small lh-sm" *ngIf="task.description">
-                            {{ task.description }}
-                          </p>
-                          <div class="d-flex align-items-center justify-content-between">
-                            <span class="badge bg-warning text-dark rounded-pill px-3">
-                              Pendiente
-                            </span>
-                            <div class="btn-group">
+
+                        <!-- Modo de edición mejorado -->
+                        <div *ngIf="editingTask?.id === task.id && editingTask">
+                          <div class="bg-light rounded-3 p-3">
+                            <h6 class="text-primary mb-3">
+                              Editando tarea
+                            </h6>
+                            <div class="mb-3">
+                              <label class="form-label fw-semibold small">TITULO</label>
+                              <input
+                                type="text"
+                                class="form-control border-2"
+                                [(ngModel)]="editingTask.title"
+                                maxlength="200"
+                                placeholder="Titulo de la tarea"
+                                required
+                              />
+                            </div>
+                            <div class="mb-4">
+                              <label class="form-label fw-semibold small">DESCRIPCION</label>
+                              <textarea
+                                class="form-control border-2"
+                                rows="2"
+                                [(ngModel)]="editingTask.description"
+                                maxlength="500"
+                                placeholder="Descripcion detallada"
+                                required
+                              ></textarea>
+                            </div>
+                            <div class="d-flex gap-2">
                               <button 
-                                class="btn btn-outline-primary btn-sm rounded-pill px-3" 
-                                (click)="startEditTask(task)"
-                                title="Editar tarea">
-                                Editar
+                                class="btn btn-success rounded-pill px-3 fw-semibold" 
+                                (click)="saveTaskEdit()"
+                                [disabled]="!editingTask.title.trim() || !editingTask.description.trim()">
+                                Guardar
                               </button>
                               <button 
-                                class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-1" 
+                                class="btn btn-outline-secondary rounded-pill px-3" 
+                                (click)="cancelEdit()">
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tareas Completadas con diseño elegante -->
+              <div *ngIf="completedTasks.length > 0">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                    <span class="text-success fw-bold">✓</span>
+                  </div>
+                  <div>
+                    <h6 class="mb-0 text-success fw-bold">Tareas Completadas</h6>
+                    <small class="text-muted">{{completedTasks.length}} terminadas</small>
+                  </div>
+                </div>
+                
+                <div class="row g-2">
+                  <div *ngFor="let task of completedTasks" class="col-12">
+                    <div class="card border-0 shadow-sm bg-success bg-opacity-5 border-start border-success border-3">
+                      <div class="card-body p-3">
+                        <div class="d-flex align-items-start">
+                          <div class="form-check form-switch me-3 mt-1">
+                            <input 
+                              class="form-check-input" 
+                              type="checkbox" 
+                              role="switch"
+                              [checked]="task.completed"
+                              (change)="toggleTaskCompletion(task)"
+                              [id]="'task-' + task?.id"
+                              style="transform: scale(1.3);"
+                            />
+                            <label class="form-check-label" [for]="'task-' + task?.id"></label>
+                          </div>
+                          <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-semibold text-decoration-line-through text-white">
+                              {{ task.title }}
+                            </h6>
+                            <p class="text-white mb-2 small lh-sm text-decoration-line-through" 
+                               *ngIf="task.description">
+                              {{ task.description }}
+                            </p>
+                            <div class="d-flex align-items-center justify-content-between">
+                              <span class="badge bg-success rounded-pill px-2 py-1 small">
+                                Completada
+                              </span>
+                              <button 
+                                class="btn btn-danger btn-sm rounded-pill px-2" 
                                 (click)="deleteTask(task.id ? task.id : 0)"
                                 title="Eliminar tarea">
                                 Eliminar
@@ -196,115 +313,15 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- Modo de edición mejorado -->
-                    <div *ngIf="editingTask?.id === task.id && editingTask">
-                      <div class="bg-light rounded-3 p-3">
-                        <h6 class="text-primary mb-3">
-                          Editando tarea
-                        </h6>
-                        <div class="mb-3">
-                          <label class="form-label fw-semibold small">TITULO</label>
-                          <input
-                            type="text"
-                            class="form-control border-2"
-                            [(ngModel)]="editingTask.title"
-                            maxlength="200"
-                            placeholder="Titulo de la tarea"
-                            required
-                          />
-                        </div>
-                        <div class="mb-4">
-                          <label class="form-label fw-semibold small">DESCRIPCION</label>
-                          <textarea
-                            class="form-control border-2"
-                            rows="2"
-                            [(ngModel)]="editingTask.description"
-                            maxlength="500"
-                            placeholder="Descripcion detallada"
-                            required
-                          ></textarea>
-                        </div>
-                        <div class="d-flex gap-2">
-                          <button 
-                            class="btn btn-success rounded-pill px-4 fw-semibold" 
-                            (click)="saveTaskEdit()"
-                            [disabled]="!editingTask.title.trim() || !editingTask.description.trim()">
-                            Guardar
-                          </button>
-                          <button 
-                            class="btn btn-outline-secondary rounded-pill px-4" 
-                            (click)="cancelEdit()">
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
-
-          <!-- Tareas Completadas con diseño elegante -->
-          <div *ngIf="completedTasks.length > 0">
-            <div class="d-flex align-items-center mb-4">
-              <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                <span class="text-success fw-bold">✓</span>
-              </div>
-              <div>
-                <h5 class="mb-0 text-success fw-bold">Tareas Completadas</h5>
-                <small class="text-muted">{{completedTasks.length}} tareas terminadas</small>
-              </div>
-            </div>
-            
-            <div class="row g-3">
-              <div *ngFor="let task of completedTasks" class="col-12">
-                <div class="card border-0 shadow-sm bg-success bg-opacity-5 border-start border-success border-4">
-                  <div class="card-body p-4">
-                    <div class="d-flex align-items-start">
-                      <div class="form-check form-switch me-3 mt-1">
-                        <input 
-                          class="form-check-input" 
-                          type="checkbox" 
-                          role="switch"
-                          [checked]="task.completed"
-                          (change)="toggleTaskCompletion(task)"
-                          [id]="'task-' + task?.id"
-                          style="transform: scale(1.5);"
-                        />
-                        <label class="form-check-label" [for]="'task-' + task?.id"></label>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-2 fw-semibold text-decoration-line-through text-white">
-                          {{ task.title }}
-                        </h6>
-                        <p class="text-white mb-3 small lh-sm text-decoration-line-through" 
-                           *ngIf="task.description">
-                          {{ task.description }}
-                        </p>
-                        <div class="d-flex align-items-center justify-content-between">
-                          <span class="badge bg-success rounded-pill px-3">
-                            Completada
-                          </span>
-                          <button 
-                            class="btn btn-danger btn-sm rounded-pill px-3" 
-                            (click)="deleteTask(task.id ? task.id : 0)"
-                            title="Eliminar tarea">
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
-      </div>
+        
+      </div> <!-- Fin del row de dos columnas -->
 
     </div>
   </div>

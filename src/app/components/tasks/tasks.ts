@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaskService } from '../../services/task';
 import { TaskInterface } from '../../models/task';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-tasks',
@@ -22,7 +24,7 @@ export class Tasks implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private authService: Auth, private router: Router) {}
 
   ngOnInit() {
     this.loadTasks();
@@ -159,5 +161,12 @@ export class Tasks implements OnInit {
 
   get completedTasks(): TaskInterface[] {
     return this.tasks.filter(task => task.completed);
+  }
+
+  logout() {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
   }
 }
