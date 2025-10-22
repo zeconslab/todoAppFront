@@ -7,7 +7,7 @@ import { TaskInterface } from '../models/task';
 @Injectable({
   providedIn: 'root'
 })
-export class Task {
+export class TaskService {
   private baseUrl = 'http://localhost:8080/api/tasks';
   constructor(private http: HttpClient, private authService: Auth) {}
   

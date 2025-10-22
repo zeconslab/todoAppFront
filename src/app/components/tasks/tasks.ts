@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Task } from '../../services/task';
+import { TaskService } from '../../services/task';
 import { TaskInterface } from '../../models/task';
 
 @Component({
@@ -13,36 +13,151 @@ import { TaskInterface } from '../../models/task';
 export class Tasks implements OnInit {
   tasks: TaskInterface[] = [];
   task: TaskInterface = {
-    id: 0,
     title: '',
     description: '',
     completed: false
   }
-  constructor(private taskService: Task) {}
+  isLoading: boolean = false;
+  editingTask: TaskInterface | null = null;
+  errorMessage: string = '';
+  successMessage: string = '';
+
+  constructor(private taskService: TaskService) {}
 
   ngOnInit() {
     this.loadTasks();
   }
 
   loadTasks() {
+    this.clearMessages();
     this.taskService.getTasks().subscribe({
       next: (tasks) => {
         this.tasks = tasks;
+        console.log('Tasks loaded:', tasks);
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.errorMessage = 'Error al cargar las tareas. Verifica tu autenticación.';
       }
     });
   }
 
   addTask() {
-    this.taskService.addTask(this.task).subscribe();
+    if (!this.task.title.trim()) {
+      this.errorMessage = 'El título de la tarea es requerido';
+      return;
+    }
+
+    if (!this.task.description.trim()) {
+      this.errorMessage = 'La descripción de la tarea es requerida';
+      return;
+    }
+
+    this.isLoading = true;
+    this.clearMessages();
+    
+    this.taskService.addTask(this.task).subscribe({
+      next: (newTask) => {
+        this.tasks.push(newTask);
+        this.task = { title: '', description: '', completed: false };
+        this.successMessage = '¡Tarea agregada exitosamente!';
+        this.clearMessagesAfterDelay();
+      },
+      error: (error) => {
+        console.error('Error adding task:', error);
+        this.errorMessage = 'Error al agregar la tarea';
+      },
+      complete: () => this.isLoading = false
+    });
   }
 
-  updateTask(task: TaskInterface) {
-    this.taskService.updateTask(task).subscribe();
+  toggleTaskCompletion(task: TaskInterface) {
+    const updatedTask = { ...task, completed: !task.completed };
+    
+    this.taskService.updateTask(updatedTask).subscribe({
+      next: (updated) => {
+        const index = this.tasks.findIndex(t => t.id === task.id);
+        if (index !== -1) {
+          this.tasks[index] = updated;
+        }
+        this.successMessage = `Tarea ${updated.completed ? 'completada' : 'marcada como pendiente'}`;
+        this.clearMessagesAfterDelay();
+      },
+      error: (error) => {
+        console.error('Error updating task:', error);
+        this.errorMessage = 'Error al actualizar la tarea';
+      }
+    });
+  }
+
+  startEditTask(task: TaskInterface) {
+    this.editingTask = { ...task };
+  }
+
+  saveTaskEdit() {
+    if (!this.editingTask || !this.editingTask.title.trim()) {
+      this.errorMessage = 'El título de la tarea es requerido';
+      return;
+    }
+
+    if (!this.editingTask.description.trim()) {
+      this.errorMessage = 'La descripción de la tarea es requerida';
+      return;
+    }
+
+    this.taskService.updateTask(this.editingTask).subscribe({
+      next: (updated) => {
+        const index = this.tasks.findIndex(t => t.id === this.editingTask!.id);
+        if (index !== -1) {
+          this.tasks[index] = updated;
+        }
+        this.editingTask = null;
+        this.successMessage = 'Tarea actualizada exitosamente';
+        this.clearMessagesAfterDelay();
+      },
+      error: (error) => {
+        console.error('Error updating task:', error);
+        this.errorMessage = 'Error al actualizar la tarea';
+      }
+    });
+  }
+
+  cancelEdit() {
+    this.editingTask = null;
   }
 
   deleteTask(taskId: number) {
-    this.taskService.deleteTask(taskId).subscribe(() => {
-      this.tasks = this.tasks.filter(t => t.id !== taskId);
-    });
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+      this.taskService.deleteTask(taskId).subscribe({
+        next: () => {
+          this.tasks = this.tasks.filter(t => t.id !== taskId);
+          this.successMessage = 'Tarea eliminada exitosamente';
+          this.clearMessagesAfterDelay();
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+          this.errorMessage = 'Error al eliminar la tarea';
+        }
+      });
+    }
+  }
+
+  private clearMessages() {
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  private clearMessagesAfterDelay() {
+    setTimeout(() => {
+      this.clearMessages();
+    }, 3000);
+  }
+
+  get pendingTasks(): TaskInterface[] {
+    return this.tasks.filter(task => !task.completed);
+  }
+
+  get completedTasks(): TaskInterface[] {
+    return this.tasks.filter(task => task.completed);
   }
 }
