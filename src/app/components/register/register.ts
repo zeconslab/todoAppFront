@@ -10,20 +10,20 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-register',
   imports: [CommonModule, FormsModule],
   templateUrl: './register.html',
-  styleUrl: './register.css'
+  styleUrl: './register.css',
 })
 export class Register {
   isLoading: boolean = false;
   register: RegisterDto = {
     email: '',
     username: '',
-    password: ''
+    password: '',
   };
 
-  constructor(private authService: Auth, private router: Router) {}
+  constructor(private authService: Auth, private router: Router) { }
 
   onRegister() {
-    if(this.register.email && this.register.username && this.register.password){
+    if (this.register.email && this.register.username && this.register.password) {
       this.isLoading = true;
       console.log(this.register);
       this.authService.register(this.register).subscribe({
@@ -34,7 +34,7 @@ export class Register {
         error: (error) => {
           this.isLoading = false;
           console.error('Error en registro:', error);
-        }
+        },
       });
     }
   }

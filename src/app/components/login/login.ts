@@ -18,7 +18,7 @@ export class Login {
   };
   isLoading: boolean = false;
 
-  constructor(private authService: Auth, private router: Router) {}
+  constructor(private authService: Auth, private router: Router) { }
 
   onLogin() {
     if (this.auth.email && this.auth.password) {

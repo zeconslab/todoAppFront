@@ -10,21 +10,25 @@ import { Auth } from '../../services/auth';
   selector: 'app-tasks',
   imports: [CommonModule, FormsModule],
   templateUrl: './tasks.html',
-  styleUrl: './tasks.css'
+  styleUrl: './tasks.css',
 })
 export class Tasks implements OnInit {
   tasks: TaskInterface[] = [];
   task: TaskInterface = {
     title: '',
     description: '',
-    completed: false
-  }
+    completed: false,
+  };
   isLoading: boolean = false;
   editingTask: TaskInterface | null = null;
   errorMessage: string = '';
   successMessage: string = '';
 
-  constructor(private taskService: TaskService, private authService: Auth, private router: Router) {}
+  constructor(
+    private taskService: TaskService,
+    private authService: Auth,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.loadTasks();
@@ -40,7 +44,7 @@ export class Tasks implements OnInit {
       error: (error) => {
         console.error('Error loading tasks:', error);
         this.errorMessage = 'Error al cargar las tareas. Verifica tu autenticación.';
-      }
+      },
     });
   }
 
@@ -57,7 +61,7 @@ export class Tasks implements OnInit {
 
     this.isLoading = true;
     this.clearMessages();
-    
+
     this.taskService.addTask(this.task).subscribe({
       next: (newTask) => {
         this.tasks.push(newTask);
@@ -69,26 +73,27 @@ export class Tasks implements OnInit {
         console.error('Error adding task:', error);
         this.errorMessage = 'Error al agregar la tarea';
       },
-      complete: () => this.isLoading = false
+      complete: () => (this.isLoading = false),
     });
   }
 
   toggleTaskCompletion(task: TaskInterface) {
     const updatedTask = { ...task, completed: !task.completed };
-    
+
     this.taskService.updateTask(updatedTask).subscribe({
       next: (updated) => {
-        const index = this.tasks.findIndex(t => t.id === task.id);
+        const index = this.tasks.findIndex((t) => t.id === task.id);
         if (index !== -1) {
           this.tasks[index] = updated;
         }
-        this.successMessage = `Tarea ${updated.completed ? 'completada' : 'marcada como pendiente'}`;
+        this.successMessage = `Tarea ${updated.completed ? 'completada' : 'marcada como pendiente'
+          }`;
         this.clearMessagesAfterDelay();
       },
       error: (error) => {
         console.error('Error updating task:', error);
         this.errorMessage = 'Error al actualizar la tarea';
-      }
+      },
     });
   }
 
@@ -109,7 +114,7 @@ export class Tasks implements OnInit {
 
     this.taskService.updateTask(this.editingTask).subscribe({
       next: (updated) => {
-        const index = this.tasks.findIndex(t => t.id === this.editingTask!.id);
+        const index = this.tasks.findIndex((t) => t.id === this.editingTask!.id);
         if (index !== -1) {
           this.tasks[index] = updated;
         }
@@ -120,7 +125,7 @@ export class Tasks implements OnInit {
       error: (error) => {
         console.error('Error updating task:', error);
         this.errorMessage = 'Error al actualizar la tarea';
-      }
+      },
     });
   }
 
@@ -132,14 +137,14 @@ export class Tasks implements OnInit {
     if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
       this.taskService.deleteTask(taskId).subscribe({
         next: () => {
-          this.tasks = this.tasks.filter(t => t.id !== taskId);
+          this.tasks = this.tasks.filter((t) => t.id !== taskId);
           this.successMessage = 'Tarea eliminada exitosamente';
           this.clearMessagesAfterDelay();
         },
         error: (error) => {
           console.error('Error deleting task:', error);
           this.errorMessage = 'Error al eliminar la tarea';
-        }
+        },
       });
     }
   }
@@ -156,11 +161,11 @@ export class Tasks implements OnInit {
   }
 
   get pendingTasks(): TaskInterface[] {
-    return this.tasks.filter(task => !task.completed);
+    return this.tasks.filter((task) => !task.completed);
   }
 
   get completedTasks(): TaskInterface[] {
-    return this.tasks.filter(task => task.completed);
+    return this.tasks.filter((task) => task.completed);
   }
 
   logout() {

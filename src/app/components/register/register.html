@@ -7,27 +7,27 @@
                     <div class="mb-3">
                         <label for="username" class="form-label">Usuario</label>
                         <input type="text" class="form-control" id="username" placeholder="Nombre de usuario"
-                        [(ngModel)]="register.username" name="username" required>
+                            [(ngModel)]="register.username" name="username" required />
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" id="email" placeholder="ejemplo@correo.com"
-                        [(ngModel)]="register.email" name="email" required>
+                            [(ngModel)]="register.email" name="email" required />
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
                         <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña"
-                        [(ngModel)]="register.password" name="password" required>
+                            [(ngModel)]="register.password" name="password" required />
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg" [disabled]="isLoading">
-                            <span class="spinner-border spinner-border-sm me-2" role="status" 
-                                      aria-hidden="true" *ngIf="isLoading"></span>
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"
+                                *ngIf="isLoading"></span>
                             {{ isLoading ? 'Creando cuenta...' : 'Registrarse' }}
                         </button>
                     </div>
                 </form>
-                <hr class="my-4">
+                <hr class="my-4" />
                 <p class="text-center text-muted">
                     ¿Ya tienes cuenta? <a href="/" class="text-decoration-none">Inicia Sesión aquí</a>
                 </p>
